@@ -1,69 +1,65 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Управление расписанием</title>
-    <style>
-        #student-container, #teacher-container {
-            display: none;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Расписание</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<h1>Управление расписанием</h1>
-<label for="role-select">Выберите роль:</label>
-<select id="role-select">
-    <option value="">--Выберите роль--</option>
-    <option value="Студент">Студент</option>
-    <option value="Преподаватель">Преподаватель</option>
+<div id="form-container">
+<h1>Регистрация</h1>
+<label for="user-type">Выберите тип пользователя:</label>
+<select id="user-type">
+<option value="student">Студент</option>
+<option value="teacher">Учитель</option>
 </select>
-
-<div id="student-container">
-    <h2>Просмотр расписания</h2>
-    <label for="student-group-select">Выберите группу:</label>
-    <select id="student-group-select">
-        <option value="IT-25">IT-25</option>
-    </select>
-
-    <h3>Расписание</h3>
-    <div id="schedule-display">
-        <!-- Расписание будет загружено сюда -->
-    </div>
+<div id="teacher-code-container" style="display:none;">
+<input type="text" id="teacher-code" placeholder="Введите код доступа">
+</div>
+<button id="register-btn">Зарегистрироваться</button>
 </div>
 
-<div id="teacher-container">
-    <h2>Редактирование расписания</h2>
-    
-    <h3>Создать новую группу</h3>
-    <input type="text" id="new-group-name" placeholder="Название группы">
-    <button id="create-group-btn">Создать группу</button>
-    
-    <h3>Выбор группы</h3>
-    <label for="edit-group-select">Выберите группу:</label>
-    <select id="edit-group-select">
-        <option value="IT-25">IT-25</option>
-    </select>
+<div id="student-container" style="display:none;">
+<h2>Выбор группы</h2>
+<label for="group-select">Выберите группу:</label>
+<select id="group-select">
+<option value="IT-25">IT-25</option>
+</select>
+<h3>Выберите день:</h3>
+<div id="day-buttons">
+<button class="day-btn" data-day="monday">Понедельник</button>
+<button class="day-btn" data-day="tuesday">Вторник</button>
+<button class="day-btn" data-day="wednesday">Среда</button>
+<button class="day-btn" data-day="thursday">Четверг</button>
+<button class="day-btn" data-day="friday">Пятница</button>
+</div>
+<div id="schedule" style="margin-top: 20px;"></div>
+</div>
 
-    <h3>Редактировать расписание</h3>
-    <label for="edit-day-select">Выберите день:</label>
-    <select id="edit-day-select">
-        <option value="monday">Понедельник</option>
-        <option value="tuesday">Вторник</option>
-        <option value="wednesday">Среда</option>
-        <option value="thursday">Четверг</option>
-        <option value="friday">Пятница</option>
-    </select>
+<div id="teacher-container" style="display:none;">
+<h2>Редактирование расписания</h2>
+<label for="edit-day-select">Выберите день:</label>
+<select id="edit-day-select">
+<option value="monday">Понедельник</option>
+<option value="tuesday">Вторник</option>
+<option value="wednesday">Среда</option>
+<option value="thursday">Четверг</option>
+<option value="friday">Пятница</option>
+</select>
 
-    <h3>Добавить пару</h3>
-    <input type="text" id="new-subject" placeholder="Предмет">
-    <input type="text" id="new-time" placeholder="Время">
-    <input type="text" id="new-teacher" placeholder="Преподаватель">
-    <button id="add-lesson-btn">Добавить</button>
+<h3>Добавить пару</h3>
+<input type="text" id="new-subject" placeholder="Предмет">
+<input type="text" id="new-time" placeholder="Время (например, 12:30-14:00)">
+<input type="text" id="new-teacher" placeholder="Преподаватель">
+<button id="add-lesson-btn">Добавить пару</button>
 
-    <h3>Удалить пару</h3>
-    <button id="remove-lesson-btn">Удалить последнюю пару</button>
+<h3>Удалить пару</h3>
+<input type="text" id="remove-time" placeholder="Время (например, 12:30-14:00)">
+<button id="remove-lesson-btn">Удалить пару</button>
+
+<h3>Текущее расписание</h3>
+<div id="teacher-schedule" style="margin-top: 20px;"></div>
 </div>
 
 <script src="script.js"></script>
