@@ -1,105 +1,117 @@
-// Проверка и загрузка расписания из Local Storage
-const savedSchedule = localStorage.getItem('schedule');
-const schedule = savedSchedule ? JSON.parse(savedSchedule) : {
-    monday: [
-        { time: "12:30-14:00", subject: "Экономика и управление", teacher: "Лариса Викторовна Клачева" },
-        { time: "14:10-15:40", subject: "Экономика и управление", teacher: "Лариса Викторовна Клачева" }
-    ],
-    tuesday: [
-        { time: "9:00-10:30", subject: "Основы программирования", teacher: "Андрей Станиславович Петрань" },
-        { time: "10:40-12:10", subject: "3Д-моделирование", teacher: "Радионов Никита Евгеньевич" }
-    ],
-    wednesday: [
-        { time: "14:10-15:40", subject: "Математика: Алгебра и начала математического анализа", teacher: "Лысова Юлия Николаевна" }
-    ],
-    thursday: [
-        { time: "12:30-14:00", subject: "Технические средства информатизации", teacher: "Морозов Александр Павлович" },
-        { time: "14:10-15:40", subject: "Операционные системы", teacher: "Морозов Александр Павлович" },
-        { time: "16:00-17:30", subject: "Иностранный язык в профессиональной деятельности", teacher: "Андрей Станиславович Петрань" }
-    ],
-    friday: [
-        { time: "9:00-10:30", subject: "Информатика", teacher: "Должкевич Евгений Александрович" },
-        { time: "10:40-12:10", subject: "Основы информационной безопасности", teacher: "Должкевич Евгений Александрович" },
-        { time: "12:30-14:00", subject: "История", teacher: "Алла Николаевна Петрань" },
-        { time: "14:10-15:40", subject: "Основы финансовой грамотности", teacher: "Ирина Игоревна Тихомирова" }
-    ]
-};
-
-// Сохранение расписания в Local Storage
-function saveSchedule() {
-    localStorage.setItem('schedule', JSON.stringify(schedule));
-}
-
-// Загружает расписание для студентов при выборе дня
-document.querySelectorAll('.day-btn').forEach(button => {
-    button.addEventListener('click', function() {
-        const day = this.getAttribute('data-day');
-        const lessons = schedule[day];
-        let output = `<h4>Расписание на ${this.textContent}:</h4>`;
-
-        lessons.forEach(lesson => {
-            output += `<p>${lesson.time} - предмет: ${lesson.subject}. Преподаватель: ${lesson.teacher}</p>`;
-        });
-
-        document.getElementById('schedule').innerHTML = output;
-    });
-});
-
-// Обработчик добавления пары
-document.getElementById('add-lesson-btn').addEventListener('click', function() {
-    const day = document.getElementById('edit-day-select').value;
-    const subject = document.getElementById('new-subject').value;
-    const time = document.getElementById('new-time').value;
-    const teacher = document.getElementById('new-teacher').value;
-
-    schedule[day].push({ time: time, subject: subject, teacher: teacher });
-    saveSchedule();  // Сохраняем расписание
-    displayTeacherSchedule();
-});
-
-// Обработчик удаления пары
-document.getElementById('remove-lesson-btn').addEventListener('click', function() {
-    const day = document.getElementById('edit-day-select').value;
-    const time = document.getElementById('remove-time').value;
-
-    schedule[day] = schedule[day].filter(lesson => lesson.time !== time);
-    saveSchedule();  // Сохраняем расписание
-    displayTeacherSchedule();
-});
-
-// Отображение текущего расписания для учителей
-function displayTeacherSchedule() {
-    const daySelect = document.getElementById('edit-day-select').value;
-    const lessons = schedule[daySelect];
-    let output = `<h4>Расписание на ${daySelect.charAt(0).toUpperCase() + daySelect.slice(1)}:</h4>`;
-
-    lessons.forEach(lesson => {
-        output += `<p>${lesson.time} - предмет: ${lesson.subject}. Преподаватель: ${lesson.teacher}</p>`;
-    });
-
-    document.getElementById('teacher-schedule').innerHTML = output;
-}
-
-// Обработчик регистрации
-document.getElementById('register-btn').addEventListener('click', function() {
-    const userType = document.getElementById('user-type').value;
-
-    if (userType === 'student') {
-        document.getElementById('student-container').style.display = 'block';
-        document.getElementById('teacher-container').style.display = 'none';
-        document.getElementById('teacher-code-container').style.display = 'none';
-    } else {
-        document.getElementById('teacher-code-container').style.display = 'block';
-        const accessCode = document.getElementById('teacher-code').value;
-
-        // Проверка кода доступа
-        if (accessCode === "Abit25") {
-            document.getElementById('teacher-container').style.display = 'block';
-            document.getElementById('student-container').style.display = 'none';
-            displayTeacherSchedule();
-        } else {
-            alert("Неверный код доступа!");
-            document.getElementById('teacher-container').style.display = 'none';
+document.addEventListener('DOMContentLoaded', () => {
+    const roleSelect = document.getElementById('role-select');
+    const studentContainer = document.getElementById('student-container');
+    const teacherContainer = document.getElementById('teacher-container');
+    const createGroupBtn = document.getElementById('create-group-btn');
+    const editGroupSelect = document.getElementById('edit-group-select');
+    const newGroupNameInput = document.getElementById('new-group-name');
+    const addLessonBtn = document.getElementById('add-lesson-btn');
+    const removeLessonBtn = document.getElementById('remove-lesson-btn');
+    const scheduleDisplay = document.getElementById('schedule-display');
+    const studentGroupSelect = document.getElementById('student-group-select');
+    let schedule = {
+        "IT-25": {
+            monday: [],
+            tuesday: [],
+            wednesday: [],
+            thursday: [],
+            friday: []
         }
-    }
+    };
+
+    const refreshGroupLists = () => {
+        const groups = Object.keys(schedule);
+        editGroupSelect.innerHTML = '';
+        studentGroupSelect.innerHTML = '';
+        groups.forEach(group => {
+            const option1 = document.createElement('option');
+            const option2 = document.createElement('option');
+            option1.value = option2.value = group;
+            option1.textContent = option2.textContent = group;
+            editGroupSelect.appendChild(option1);
+            studentGroupSelect.appendChild(option2);
+        });
+    };
+
+    roleSelect.addEventListener('change', () => {
+        if (roleSelect.value === 'Студент') {
+            studentContainer.style.display = 'block';
+            teacherContainer.style.display = 'none';
+            showSchedule(studentGroupSelect.value);
+        } else if (roleSelect.value === 'Преподаватель') {
+            teacherContainer.style.display = 'block';
+            studentContainer.style.display = 'none';
+        } else {
+            studentContainer.style.display = 'none';
+            teacherContainer.style.display = 'none';
+        }
+    });
+
+    createGroupBtn.addEventListener('click', () => {
+        const groupName = newGroupNameInput.value.trim();
+        if (groupName && !schedule[groupName]) {
+            schedule[groupName] = {
+                monday: [],
+                tuesday: [],
+                wednesday: [],
+                thursday: [],
+                friday: []
+            };
+            refreshGroupLists();
+            newGroupNameInput.value = '';
+            alert('Группа создана!');
+        } else {
+            alert('Введите уникальное название группы.');
+        }
+    });
+
+    addLessonBtn.addEventListener('click', () => {
+        const groupName = editGroupSelect.value;
+        const day = document.getElementById('edit-day-select').value;
+        const newSubject = document.getElementById('new-subject').value.trim();
+        const newTime = document.getElementById('new-time').value.trim();
+        const newTeacher = document.getElementById('new-teacher').value.trim();
+        if (newSubject && newTime && newTeacher) {
+            schedule[groupName][day].push({ subject: newSubject, time: newTime, teacher: newTeacher });
+            alert('Пара добавлена!');
+        } else {
+            alert('Введите название предмета, время и преподавателя.');
+        }
+    });
+
+    removeLessonBtn.addEventListener('click', () => {
+        const groupName = editGroupSelect.value;
+        const day = document.getElementById('edit-day-select').value;
+        if (schedule[groupName][day].length > 0) {
+            schedule[groupName][day].pop();
+            alert('Последняя пара удалена!');
+        } else {
+            alert('Нет пар для удаления.');
+        }
+    });
+
+    studentGroupSelect.addEventListener('change', (event) => {
+        showSchedule(event.target.value);
+    });
+
+    const showSchedule = (groupName) => {
+        const groupSchedule = schedule[groupName];
+        scheduleDisplay.innerHTML = '';
+        Object.keys(groupSchedule).forEach(day => {
+            const dayDiv = document.createElement('div');
+            dayDiv.innerHTML = `<h4>${day.charAt(0).toUpperCase() + day.slice(1)}</h4>`;
+            if (groupSchedule[day].length > 0) {
+                groupSchedule[day].forEach(lesson => {
+                    const lessonDiv = document.createElement('div');
+                    lessonDiv.textContent = `${lesson.time} - ${lesson.subject} (${lesson.teacher})`;
+                    dayDiv.appendChild(lessonDiv);
+                });
+            } else {
+                dayDiv.innerHTML += `<p>Нет пар</p>`;
+            }
+            scheduleDisplay.appendChild(dayDiv);
+        });
+    };
+
+    refreshGroupLists();
 });
